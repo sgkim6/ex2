@@ -1,0 +1,14 @@
+package com.example.demo.domain.creator.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CreatorDto {
+
+	private String id;
+	private String name;
+}

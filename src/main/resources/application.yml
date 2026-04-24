@@ -1,6 +1,8 @@
 spring:
   application:
     name: demo
+  profiles:
+    active: local
   datasource:
     url: jdbc:postgresql://localhost:5432/liveklass
     username: pick

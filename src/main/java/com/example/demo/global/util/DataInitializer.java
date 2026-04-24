@@ -2,38 +2,36 @@ package com.example.demo.global.util;
 
 import com.example.demo.domain.creator.dto.CreatorDto;
 import com.example.demo.domain.creator.dto.CreatorListDto;
+import com.example.demo.domain.creator.repository.CreatorRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
+@Profile("local")
 public class DataInitializer implements CommandLineRunner {
 
-	private static final String DATA_FILE_PATH = "data.json";
-
+	private final CreatorRepository creatorRepository;
 	private final ObjectMapper objectMapper;
 
 	@Override
-	public void run(String... args) {
-		List<CreatorDto> creators = loadCreators();
-		log.info("Loaded {} creators from {}", creators.size(), DATA_FILE_PATH);
-	}
+	public void run(String... args) throws Exception {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream("data.json")) {
+			if (is == null) {
+				throw new IllegalStateException("data.json not found");
+			}
 
-	public List<CreatorDto> loadCreators() {
-		try (InputStream inputStream = new ClassPathResource(DATA_FILE_PATH).getInputStream()) {
-			CreatorListDto creatorListDto = objectMapper.readValue(inputStream, CreatorListDto.class);
-			return creatorListDto.getCreators() == null ? Collections.emptyList() : creatorListDto.getCreators();
-		} catch (IOException exception) {
-			throw new IllegalStateException("Failed to load creators from " + DATA_FILE_PATH, exception);
+			CreatorListDto data = objectMapper.readValue(is, CreatorListDto.class);
+
+			for (CreatorDto dto : data.getCreators()) {
+				if (!creatorRepository.existsByExternalId(dto.getId())) {
+					creatorRepository.save(dto.toEntity());
+				}
+			}
 		}
 	}
 }

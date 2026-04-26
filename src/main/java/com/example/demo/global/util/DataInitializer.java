@@ -3,6 +3,7 @@ package com.example.demo.global.util;
 import com.example.demo.domain.course.dto.CourseDto;
 import com.example.demo.domain.course.dto.CourseListDto;
 import com.example.demo.domain.course.repository.CourseRepository;
+import com.example.demo.domain.creator.entity.Creator;
 import com.example.demo.domain.creator.dto.CreatorDto;
 import com.example.demo.domain.creator.dto.CreatorListDto;
 import com.example.demo.domain.creator.repository.CreatorRepository;
@@ -34,7 +35,9 @@ public class DataInitializer implements CommandLineRunner {
 		if (courseRepository.count() == 0) {
 			CourseListDto courseData = readCourseData();
 			for (CourseDto dto : courseData.getCourses()) {
-				courseRepository.save(dto.toEntity());
+				Creator creator = creatorRepository.findById(dto.getCreatorId())
+					.orElseThrow(() -> new IllegalArgumentException("creator not found: " + dto.getCreatorId()));
+				courseRepository.save(dto.toEntity(creator));
 			}
 		}
 	}

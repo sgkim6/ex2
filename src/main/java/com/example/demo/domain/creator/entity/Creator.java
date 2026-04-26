@@ -20,14 +20,10 @@ public class Creator extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String externalId; // 외부 아이디(creator-1 ..)
-
 	@Column(nullable = false)
 	private String name;
 
-	public Creator(String externalId, String name) {
-		this.externalId = externalId;
+	public Creator(String name) {
 		this.name = name;
 	}
 }

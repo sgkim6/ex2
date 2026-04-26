@@ -20,17 +20,13 @@ public class Course extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String externalId;
-
 	@Column(nullable = false)
-	private String creatorId;
+	private Long creatorId;
 
 	@Column(nullable = false)
 	private String title;
 
-	public Course(String externalId, String creatorId, String title) {
-		this.externalId = externalId;
+	public Course(Long creatorId, String title) {
 		this.creatorId = creatorId;
 		this.title = title;
 	}

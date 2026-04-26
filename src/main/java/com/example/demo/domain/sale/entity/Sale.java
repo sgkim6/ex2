@@ -21,11 +21,8 @@ public class Sale extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, unique = true)
-	private String externalId;
-
 	@Column(nullable = false)
-	private String courseId;
+	private Long courseId;
 
 	@Column(nullable = false)
 	private String studentId;
@@ -36,8 +33,7 @@ public class Sale extends BaseEntity {
 	@Column(nullable = false)
 	private OffsetDateTime paidAt;
 
-	public Sale(String externalId, String courseId, String studentId, Integer amount, OffsetDateTime paidAt) {
-		this.externalId = externalId;
+	public Sale(Long courseId, String studentId, Integer amount, OffsetDateTime paidAt) {
 		this.courseId = courseId;
 		this.studentId = studentId;
 		this.amount = amount;

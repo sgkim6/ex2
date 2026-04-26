@@ -10,10 +10,9 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CreatorDto {
 
-	private String id;
 	private String name;
 
 	public Creator toEntity() {
-		return new Creator(id, name);
+		return new Creator(name);
 	}
 }

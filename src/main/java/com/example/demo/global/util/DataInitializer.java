@@ -24,16 +24,16 @@ public class DataInitializer implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		CreatorListDto creatorData = readCreatorData();
-		for (CreatorDto dto : creatorData.getCreators()) {
-			if (!creatorRepository.existsByExternalId(dto.getId())) {
+		if (creatorRepository.count() == 0) {
+			CreatorListDto creatorData = readCreatorData();
+			for (CreatorDto dto : creatorData.getCreators()) {
 				creatorRepository.save(dto.toEntity());
 			}
 		}
 
-		CourseListDto courseData = readCourseData();
-		for (CourseDto dto : courseData.getCourses()) {
-			if (!courseRepository.existsByExternalId(dto.getId())) {
+		if (courseRepository.count() == 0) {
+			CourseListDto courseData = readCourseData();
+			for (CourseDto dto : courseData.getCourses()) {
 				courseRepository.save(dto.toEntity());
 			}
 		}

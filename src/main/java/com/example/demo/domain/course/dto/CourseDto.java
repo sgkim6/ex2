@@ -10,11 +10,10 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CourseDto {
 
-	private String id;
-	private String creatorId;
+	private Long creatorId;
 	private String title;
 
 	public Course toEntity() {
-		return new Course(id, creatorId, title);
+		return new Course(creatorId, title);
 	}
 }

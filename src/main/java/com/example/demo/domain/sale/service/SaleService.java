@@ -3,10 +3,16 @@ package com.example.demo.domain.sale.service;
 import com.example.demo.domain.course.entity.Course;
 import com.example.demo.domain.course.repository.CourseRepository;
 import com.example.demo.domain.sale.dto.SaleRequestDto;
+import com.example.demo.domain.sale.dto.SaleResponseDto;
 import com.example.demo.domain.sale.entity.Sale;
 import com.example.demo.domain.sale.repository.SaleRepository;
 import com.example.demo.global.exception.BusinessException;
 import com.example.demo.global.exception.ErrorCode;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,5 +38,21 @@ public class SaleService {
 			.build();
 
 		saleRepository.save(sale);
+	}
+
+	@Transactional(readOnly = true)
+	public List<SaleResponseDto> getSales(Long creatorId, LocalDate startDate, LocalDate endDate) {
+		OffsetDateTime startDateTime = startDate.atStartOfDay().atOffset(ZoneOffset.ofHours(9));
+		OffsetDateTime endDateTime = endDate.atTime(LocalTime.MAX).atOffset(ZoneOffset.ofHours(9));
+
+		return saleRepository
+			.findSalesByCreatorIdAndPaidAtBetween(
+				creatorId,
+				startDateTime,
+				endDateTime
+			)
+			.stream()
+			.map(SaleResponseDto::from)
+			.toList();
 	}
 }

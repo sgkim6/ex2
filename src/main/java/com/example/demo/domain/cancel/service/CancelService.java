@@ -23,7 +23,9 @@ public class CancelService {
 		Sale sale = saleRepository.findByIdAndIsValidTrue(request.getSaleId())
 			.orElseThrow(() -> new BusinessException(ErrorCode.SALE_NOT_FOUND));
 
+		//해당 판매에 대한 총 환불 금액
 		Integer refundedAmount = cancelRepository.sumRefundAmountBySaleId(sale.getId());
+		//환불 가능 금액(원가-총환불)
 		Integer refundableAmount = sale.getAmount() - refundedAmount;
 
 		if (refundableAmount < request.getRefundAmount()) {

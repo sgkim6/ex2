@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-	INVALID_EXTENSION(HttpStatus.BAD_REQUEST, "E001", "tmp"),
+	COURSE_NOT_FOUND(HttpStatus.NOT_FOUND, "E001", "강의를 찾을 수 없습니다."),
 	;
 
 	private final HttpStatus status;

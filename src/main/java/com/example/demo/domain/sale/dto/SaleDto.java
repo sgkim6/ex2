@@ -1,5 +1,6 @@
 package com.example.demo.domain.sale.dto;
 
+import com.example.demo.domain.course.entity.Course;
 import com.example.demo.domain.sale.entity.Sale;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.OffsetDateTime;
@@ -16,7 +17,7 @@ public class SaleDto {
 	private Integer amount;
 	private OffsetDateTime paidAt;
 
-	public Sale toEntity() {
-		return new Sale(courseId, studentId, amount, paidAt);
+	public Sale toEntity(Course course) {
+		return new Sale(course, studentId, amount, paidAt);
 	}
 }

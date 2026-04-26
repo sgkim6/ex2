@@ -49,7 +49,7 @@ public class DataInitializer implements CommandLineRunner {
 		if (saleRepository.count() == 0) {
 			SaleListDto saleData = readSaleData();
 			for (SaleDto dto : saleData.getSaleRecords()) {
-				Course course = courseRepository.findById(dto.getCourseId())
+				Course course = courseRepository.findByIdAndIsValidTrue(dto.getCourseId())
 					.orElseThrow(() -> new IllegalArgumentException("course not found: " + dto.getCourseId()));
 				saleRepository.save(dto.toEntity(course));
 			}

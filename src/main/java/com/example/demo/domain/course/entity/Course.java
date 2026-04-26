@@ -11,13 +11,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "courses")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Course extends BaseEntity {
 
 	@Id
@@ -31,7 +33,8 @@ public class Course extends BaseEntity {
 	@Column(nullable = false)
 	private String title;
 
-	public Course(Creator creator, String title) {
+	@Builder
+	private Course(Creator creator, String title) {
 		this.creator = creator;
 		this.title = title;
 	}

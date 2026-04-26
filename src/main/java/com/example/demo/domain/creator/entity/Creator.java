@@ -7,13 +7,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "creators")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Creator extends BaseEntity {
 
 	@Id
@@ -23,7 +25,8 @@ public class Creator extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
-	public Creator(String name) {
+	@Builder
+	private Creator(String name) {
 		this.name = name;
 	}
 }

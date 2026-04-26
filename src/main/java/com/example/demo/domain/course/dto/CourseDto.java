@@ -15,6 +15,9 @@ public class CourseDto {
 	private String title;
 
 	public Course toEntity(Creator creator) {
-		return new Course(creator, title);
+		return Course.builder()
+			.creator(creator)
+			.title(title)
+			.build();
 	}
 }

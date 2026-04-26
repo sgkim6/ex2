@@ -12,13 +12,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
 @Table(name = "sales")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Sale extends BaseEntity {
 
 	@Id
@@ -38,7 +40,8 @@ public class Sale extends BaseEntity {
 	@Column(nullable = false)
 	private OffsetDateTime paidAt;
 
-	public Sale(Course course, String studentId, Integer amount, OffsetDateTime paidAt) {
+	@Builder
+	private Sale(Course course, String studentId, Integer amount, OffsetDateTime paidAt) {
 		this.course = course;
 		this.studentId = studentId;
 		this.amount = amount;

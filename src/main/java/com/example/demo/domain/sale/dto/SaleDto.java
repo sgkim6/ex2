@@ -18,6 +18,11 @@ public class SaleDto {
 	private OffsetDateTime paidAt;
 
 	public Sale toEntity(Course course) {
-		return new Sale(course, studentId, amount, paidAt);
+		return Sale.builder()
+			.course(course)
+			.studentId(studentId)
+			.amount(amount)
+			.paidAt(paidAt)
+			.build();
 	}
 }

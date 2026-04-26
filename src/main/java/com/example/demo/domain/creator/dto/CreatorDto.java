@@ -13,6 +13,8 @@ public class CreatorDto {
 	private String name;
 
 	public Creator toEntity() {
-		return new Creator(name);
+		return Creator.builder()
+			.name(name)
+			.build();
 	}
 }

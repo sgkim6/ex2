@@ -21,7 +21,7 @@ public class SaleService {
 	@Transactional
 	public void createSale(SaleRequestDto request) {
 		//강의 참조 실패
-		Course course = courseRepository.findById(request.getCourseId())
+		Course course = courseRepository.findByIdAndIsValidTrue(request.getCourseId())
 			.orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND));
 
 		Sale sale = Sale.builder()

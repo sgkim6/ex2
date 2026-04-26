@@ -42,15 +42,49 @@ public class SaleService {
 
 	@Transactional(readOnly = true)
 	public List<SaleResponseDto> getSales(Long creatorId, LocalDate startDate, LocalDate endDate) {
-		OffsetDateTime startDateTime = startDate.atStartOfDay().atOffset(ZoneOffset.ofHours(9));
-		OffsetDateTime endDateTime = endDate.atTime(LocalTime.MAX).atOffset(ZoneOffset.ofHours(9));
+		// 시작날짜-끝날짜 검증
+		if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+			throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
+		}
 
-		return saleRepository
-			.findSalesByCreatorIdAndPaidAtBetween(
-				creatorId,
-				startDateTime,
-				endDateTime
-			)
+
+		// 시작 o 끝 o
+		if (startDate != null && endDate != null) {
+			OffsetDateTime startDateTime = startDate.atStartOfDay().atOffset(ZoneOffset.ofHours(9));
+			OffsetDateTime endDateTime = endDate.atTime(LocalTime.MAX).atOffset(ZoneOffset.ofHours(9));
+
+			return saleRepository
+				.findSalesByCreatorIdAndPaidAtBetween(creatorId, startDateTime, endDateTime)
+				.stream()
+				.map(SaleResponseDto::from)
+				.toList();
+		}
+
+
+		// 시작 o 끝 x
+		if (startDate != null) {
+			OffsetDateTime startDateTime = startDate.atStartOfDay().atOffset(ZoneOffset.ofHours(9));
+
+			return saleRepository
+				.findSalesByCreatorIdFromStartDateTime(creatorId, startDateTime)
+				.stream()
+				.map(SaleResponseDto::from)
+				.toList();
+		}
+
+		// 시작 x 끝 o
+		if (endDate != null) {
+			OffsetDateTime endDateTime = endDate.atTime(LocalTime.MAX).atOffset(ZoneOffset.ofHours(9));
+
+			return saleRepository
+				.findSalesByCreatorIdUntilEndDateTime(creatorId, endDateTime)
+				.stream()
+				.map(SaleResponseDto::from)
+				.toList();
+		}
+
+		// 둘다 없음(전체조회)
+		return saleRepository.findAllSalesByCreatorId(creatorId)
 			.stream()
 			.map(SaleResponseDto::from)
 			.toList();

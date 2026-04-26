@@ -19,6 +19,6 @@ public class CancelController {
 	@PostMapping
 	public ApiResult<Void> createCancel(@RequestBody CancelRequestDto request) {
 		cancelService.createCancel(request);
-		return ApiResult.succeed(null, "취소 등록 완료");
+		return ApiResult.succeed(null, "환불 등록 완료");
 	}
 }

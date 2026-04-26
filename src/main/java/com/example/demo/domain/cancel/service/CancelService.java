@@ -23,6 +23,13 @@ public class CancelService {
 		Sale sale = saleRepository.findByIdAndIsValidTrue(request.getSaleId())
 			.orElseThrow(() -> new BusinessException(ErrorCode.SALE_NOT_FOUND));
 
+		Integer refundedAmount = cancelRepository.sumRefundAmountBySaleId(sale.getId());
+		Integer refundableAmount = sale.getAmount() - refundedAmount;
+
+		if (refundableAmount < request.getRefundAmount()) {
+			throw new BusinessException(ErrorCode.REFUND_AMOUNT_EXCEEDED);
+		}
+
 		Cancel cancel = Cancel.builder()
 			.sale(sale)
 			.refundAmount(request.getRefundAmount())

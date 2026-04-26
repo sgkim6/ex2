@@ -1,6 +1,6 @@
 package com.example.demo.global.exception;
 
-import java.util.Map;
+import com.example.demo.global.response.ApiResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,15 +9,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException exception) {
+	public ResponseEntity<ApiResult<Void>> handleBusinessException(BusinessException exception) {
 		ErrorCode errorCode = exception.getErrorCode();
 
 		return ResponseEntity
 			.status(errorCode.getStatus())
-			.body(Map.of(
-				"status", errorCode.getStatus().value(),
-				"code", errorCode.getCode(),
-				"message", errorCode.getMessage()
-			));
+			.body(ApiResult.failed(errorCode.getStatus().value(), exception));
 	}
 }

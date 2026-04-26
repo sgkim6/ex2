@@ -1,5 +1,8 @@
 package com.example.demo.global.util;
 
+import com.example.demo.domain.course.dto.CourseDto;
+import com.example.demo.domain.course.dto.CourseListDto;
+import com.example.demo.domain.course.repository.CourseRepository;
 import com.example.demo.domain.creator.dto.CreatorDto;
 import com.example.demo.domain.creator.dto.CreatorListDto;
 import com.example.demo.domain.creator.repository.CreatorRepository;
@@ -16,22 +19,43 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
 	private final CreatorRepository creatorRepository;
+	private final CourseRepository courseRepository;
 	private final ObjectMapper objectMapper;
 
 	@Override
 	public void run(String... args) throws Exception {
+		CreatorListDto creatorData = readCreatorData();
+		for (CreatorDto dto : creatorData.getCreators()) {
+			if (!creatorRepository.existsByExternalId(dto.getId())) {
+				creatorRepository.save(dto.toEntity());
+			}
+		}
+
+		CourseListDto courseData = readCourseData();
+		for (CourseDto dto : courseData.getCourses()) {
+			if (!courseRepository.existsByExternalId(dto.getId())) {
+				courseRepository.save(dto.toEntity());
+			}
+		}
+	}
+
+	private CreatorListDto readCreatorData() throws Exception {
 		try (InputStream is = getClass().getClassLoader().getResourceAsStream("data.json")) {
 			if (is == null) {
 				throw new IllegalStateException("data.json not found");
 			}
 
-			CreatorListDto data = objectMapper.readValue(is, CreatorListDto.class);
+			return objectMapper.readValue(is, CreatorListDto.class);
+		}
+	}
 
-			for (CreatorDto dto : data.getCreators()) {
-				if (!creatorRepository.existsByExternalId(dto.getId())) {
-					creatorRepository.save(dto.toEntity());
-				}
+	private CourseListDto readCourseData() throws Exception {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream("data.json")) {
+			if (is == null) {
+				throw new IllegalStateException("data.json not found");
 			}
+
+			return objectMapper.readValue(is, CourseListDto.class);
 		}
 	}
 }

@@ -1,5 +1,8 @@
 package com.example.demo.global.util;
 
+import com.example.demo.domain.cancel.dto.CancelDto;
+import com.example.demo.domain.cancel.dto.CancelListDto;
+import com.example.demo.domain.cancel.repository.CancelRepository;
 import com.example.demo.domain.course.dto.CourseDto;
 import com.example.demo.domain.course.dto.CourseListDto;
 import com.example.demo.domain.course.entity.Course;
@@ -8,6 +11,7 @@ import com.example.demo.domain.creator.entity.Creator;
 import com.example.demo.domain.creator.dto.CreatorDto;
 import com.example.demo.domain.creator.dto.CreatorListDto;
 import com.example.demo.domain.creator.repository.CreatorRepository;
+import com.example.demo.domain.sale.entity.Sale;
 import com.example.demo.domain.sale.dto.SaleDto;
 import com.example.demo.domain.sale.dto.SaleListDto;
 import com.example.demo.domain.sale.repository.SaleRepository;
@@ -26,6 +30,7 @@ public class DataInitializer implements CommandLineRunner {
 	private final CreatorRepository creatorRepository;
 	private final CourseRepository courseRepository;
 	private final SaleRepository saleRepository;
+	private final CancelRepository cancelRepository;
 	private final ObjectMapper objectMapper;
 
 	@Override
@@ -52,6 +57,15 @@ public class DataInitializer implements CommandLineRunner {
 				Course course = courseRepository.findByIdAndIsValidTrue(dto.getCourseId())
 					.orElseThrow(() -> new IllegalArgumentException("course not found: " + dto.getCourseId()));
 				saleRepository.save(dto.toEntity(course));
+			}
+		}
+
+		if (cancelRepository.count() == 0) {
+			CancelListDto cancelData = readCancelData();
+			for (CancelDto dto : cancelData.getCancels()) {
+				Sale sale = saleRepository.findByIdAndIsValidTrue(dto.getSaleId())
+					.orElseThrow(() -> new IllegalArgumentException("sale not found: " + dto.getSaleId()));
+				cancelRepository.save(dto.toEntity(sale));
 			}
 		}
 	}
@@ -83,6 +97,16 @@ public class DataInitializer implements CommandLineRunner {
 			}
 
 			return objectMapper.readValue(is, SaleListDto.class);
+		}
+	}
+
+	private CancelListDto readCancelData() throws Exception {
+		try (InputStream is = getClass().getClassLoader().getResourceAsStream("data.json")) {
+			if (is == null) {
+				throw new IllegalStateException("data.json not found");
+			}
+
+			return objectMapper.readValue(is, CancelListDto.class);
 		}
 	}
 }

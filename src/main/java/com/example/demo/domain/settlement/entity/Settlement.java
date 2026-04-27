@@ -33,6 +33,9 @@ public class Settlement extends BaseEntity {
 	@JoinColumn(name = "creator_id", nullable = false)
 	private Creator creator;
 
+	@Column(nullable = false)
+	private String settlementMonth;
+
 	//총 판매
 	@Column(nullable = false)
 	private Integer totalSalesAmount;
@@ -60,6 +63,7 @@ public class Settlement extends BaseEntity {
 	@Builder
 	private Settlement(
 		Creator creator,
+		String settlementMonth,
 		Integer totalSalesAmount,
 		Integer totalRefundAmount,
 		BigDecimal feeRate,
@@ -68,6 +72,7 @@ public class Settlement extends BaseEntity {
 		SettlementStatus status
 	) {
 		this.creator = creator;
+		this.settlementMonth = settlementMonth;
 		this.totalSalesAmount = totalSalesAmount;
 		this.totalRefundAmount = totalRefundAmount;
 		this.feeRate = feeRate;

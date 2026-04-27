@@ -50,6 +50,7 @@ public class SettlementService {
 		YearMonth currentMonth = YearMonth.now();
 		String settlementMonth = request.getYearMonth().toString();
 
+		// 정산 날짜 정합성 검사
 		if (!request.getYearMonth().isBefore(currentMonth)) {
 			throw new BusinessException(ErrorCode.INVALID_SETTLEMENT_MONTH);
 		}
@@ -59,7 +60,23 @@ public class SettlementService {
 			throw new BusinessException(ErrorCode.SETTLEMENT_ALREADY_PROCESSED);
 		}
 
-		// TODO 정산 확정 로직 구현
+		// 정산 예상금액 계산
+		SettlementResponseDto settlementResponseDto = calculateSettlement(request.getCreatorId(), request.getYearMonth());
+		Creator creator = creatorRepository.findById(request.getCreatorId())
+			.orElseThrow(() -> new BusinessException(ErrorCode.CREATOR_NOT_FOUND));
+
+		Settlement settlement = Settlement.builder()
+			.creator(creator)
+			.settlementMonth(settlementResponseDto.getYearMonth())
+			.totalSalesAmount(settlementResponseDto.getTotalSalesAmount())
+			.totalRefundAmount(settlementResponseDto.getTotalRefundAmount())
+			.feeRate(settlementResponseDto.getFeeRate())
+			.salesCount(settlementResponseDto.getSalesCount())
+			.cancelCount(settlementResponseDto.getCancelCount())
+			.status(SettlementStatus.CONFIRM)
+			.build();
+
+		settlementRepository.save(settlement);
 	}
 
 	// 해당월 정산 없을경우 원천데이터로 계산

@@ -12,12 +12,12 @@ public class SettlementResponseDto {
 
 	private Long creatorId;
 	private String yearMonth;
-	private Integer totalSalesAmount;
-	private Integer totalRefundAmount;
-	private Integer netSalesAmount;
-	private BigDecimal feeRate;
-	private Integer feeAmount;
-	private Integer expectedSettlementAmount;
+	private Integer totalSalesAmount; // 총 판매금액
+	private Integer totalRefundAmount; // 총 환불금액
+	private Integer netSalesAmount; // 순 판매금액
+	private BigDecimal feeRate; // 당시 적용 수수료율
+	private Integer feeAmount; // 수수료
+	private Integer expectedSettlementAmount; // 총 정산액
 	private Integer salesCount;
 	private Integer cancelCount;
 	private SettlementStatus status;

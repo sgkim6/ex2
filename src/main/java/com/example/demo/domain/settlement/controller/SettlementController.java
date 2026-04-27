@@ -3,6 +3,8 @@ package com.example.demo.domain.settlement.controller;
 import com.example.demo.domain.settlement.dto.SettlementPayRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
+import com.example.demo.domain.settlement.dto.SettlementSummaryRequestDto;
+import com.example.demo.domain.settlement.dto.SettlementSummaryResponseDto;
 import com.example.demo.domain.settlement.service.SettlementService;
 import com.example.demo.global.response.ApiResult;
 import java.time.YearMonth;
@@ -28,6 +30,18 @@ public class SettlementController {
 		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
 	) {
 		return ApiResult.succeed(settlementService.getSettlement(creatorId, yearMonth));
+	}
+
+	@GetMapping("/summary")
+	public ApiResult<SettlementSummaryResponseDto> getSettlementSummaries(
+		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth startYearMonth,
+		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth endYearMonth
+	) {
+		SettlementSummaryRequestDto request = new SettlementSummaryRequestDto(startYearMonth, endYearMonth);
+		return ApiResult.succeed(
+			settlementService.getSettlementSummaries(request),
+			"운영자 정산 집계 조회 완료"
+		);
 	}
 
 	@PostMapping("/confirm")

@@ -1,11 +1,14 @@
 package com.example.demo.domain.settlement.controller;
 
+import com.example.demo.domain.settlement.dto.SettlementRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
 import com.example.demo.domain.settlement.service.SettlementService;
 import com.example.demo.global.response.ApiResult;
 import java.time.YearMonth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,5 +27,11 @@ public class SettlementController {
 		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth
 	) {
 		return ApiResult.succeed(settlementService.getSettlement(creatorId, yearMonth));
+	}
+
+	@PostMapping("/confirm")
+	public ApiResult<Void> confirmSettlement(@RequestBody SettlementRequestDto request) {
+		settlementService.confirmSettlement(request);
+		return ApiResult.succeed(null, "정산 확정 완료");
 	}
 }

@@ -68,4 +68,20 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 		order by s.paidAt desc
 		""")
 	List<Sale> findAllSalesByCreatorId(@Param("creatorId") Long creatorId);
+
+	@Query("""
+		select s
+		from Sale s
+		join fetch s.course c
+		where c.creator.id = :creatorId
+		  and s.isValid = true
+		  and c.isValid = true
+		  and s.paidAt between :startDateTime and :endDateTime
+		order by s.paidAt desc
+		""")
+	List<Sale> findSalesByCreatorIdAndMonth(
+		@Param("creatorId") Long creatorId,
+		@Param("startDateTime") OffsetDateTime startDateTime,
+		@Param("endDateTime") OffsetDateTime endDateTime
+	);
 }

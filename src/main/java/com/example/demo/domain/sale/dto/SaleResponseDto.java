@@ -13,7 +13,7 @@ public class SaleResponseDto {
 	private final Long courseId;
 	private final String courseTitle;
 	private final String studentId;
-	private final Integer amount;
+	private final Integer amount; // 판매액
 	private final OffsetDateTime paidAt;
 
 	public static SaleResponseDto from(Sale sale) {

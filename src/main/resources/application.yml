@@ -16,3 +16,6 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+settlement:
+  fee-rate: 0.20

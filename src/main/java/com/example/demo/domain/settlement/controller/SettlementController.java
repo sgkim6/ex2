@@ -1,5 +1,6 @@
 package com.example.demo.domain.settlement.controller;
 
+import com.example.demo.domain.settlement.dto.SettlementPayRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
 import com.example.demo.domain.settlement.service.SettlementService;
@@ -32,5 +33,10 @@ public class SettlementController {
 	@PostMapping("/confirm")
 	public ApiResult<SettlementResponseDto> confirmSettlement(@RequestBody SettlementRequestDto request) {
 		return ApiResult.succeed(settlementService.confirmSettlement(request), "정산 확정 완료");
+	}
+
+	@PostMapping("/pay")
+	public ApiResult<SettlementResponseDto> paySettlement(@RequestBody SettlementPayRequestDto request) {
+		return ApiResult.succeed(settlementService.paySettlement(request), "정산 지급 완료");
 	}
 }

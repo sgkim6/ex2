@@ -7,6 +7,7 @@ import com.example.demo.domain.creator.repository.CreatorRepository;
 import com.example.demo.domain.sale.entity.Sale;
 import com.example.demo.domain.sale.repository.SaleRepository;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
+import com.example.demo.domain.settlement.dto.SettlementRequestDto;
 import com.example.demo.domain.settlement.entity.Settlement;
 import com.example.demo.domain.settlement.entity.SettlementStatus;
 import com.example.demo.domain.settlement.repository.SettlementRepository;
@@ -17,7 +18,7 @@ import java.math.RoundingMode;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class SettlementService {
-
-	private static final ZoneOffset KST = ZoneOffset.ofHours(9);
 
 	private final SettlementRepository settlementRepository;
 	private final CreatorRepository creatorRepository;
@@ -46,13 +45,31 @@ public class SettlementService {
 			.orElseGet(() -> calculateSettlement(creatorId, yearMonth));
 	}
 
+	@Transactional
+	public void confirmSettlement(SettlementRequestDto request) {
+		YearMonth currentMonth = YearMonth.now();
+		String settlementMonth = request.getYearMonth().toString();
+
+		if (!request.getYearMonth().isBefore(currentMonth)) {
+			throw new BusinessException(ErrorCode.INVALID_SETTLEMENT_MONTH);
+		}
+
+		// 중복 정산 검사
+		if (settlementRepository.findByCreatorIdAndSettlementMonth(request.getCreatorId(), settlementMonth).isPresent()) {
+			throw new BusinessException(ErrorCode.SETTLEMENT_ALREADY_PROCESSED);
+		}
+
+		// TODO 정산 확정 로직 구현
+	}
+
 	// 해당월 정산 없을경우 원천데이터로 계산
 	private SettlementResponseDto calculateSettlement(Long creatorId, YearMonth yearMonth) {
 		Creator creator = creatorRepository.findById(creatorId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.CREATOR_NOT_FOUND));
 
-		OffsetDateTime startDateTime = yearMonth.atDay(1).atStartOfDay().atOffset(KST);
-		OffsetDateTime endDateTime = yearMonth.atEndOfMonth().atTime(LocalTime.MAX).atOffset(KST);
+		ZoneId zoneId = ZoneId.systemDefault();
+		OffsetDateTime startDateTime = yearMonth.atDay(1).atStartOfDay(zoneId).toOffsetDateTime();
+		OffsetDateTime endDateTime = yearMonth.atEndOfMonth().atTime(LocalTime.MAX).atZone(zoneId).toOffsetDateTime();
 
 		// 해당 강사 모든 판매/취소 불러오기
 		List<Sale> sales = saleRepository.findSalesByCreatorIdAndMonth(creatorId, startDateTime, endDateTime);

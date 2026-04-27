@@ -80,4 +80,8 @@ public class Settlement extends BaseEntity {
 		this.cancelCount = cancelCount;
 		this.status = status;
 	}
+
+	public void markAsPaid() {
+		this.status = SettlementStatus.PAID;
+	}
 }

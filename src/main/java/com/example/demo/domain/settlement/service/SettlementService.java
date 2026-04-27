@@ -6,6 +6,7 @@ import com.example.demo.domain.creator.entity.Creator;
 import com.example.demo.domain.creator.repository.CreatorRepository;
 import com.example.demo.domain.sale.entity.Sale;
 import com.example.demo.domain.sale.repository.SaleRepository;
+import com.example.demo.domain.settlement.dto.SettlementPayRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
 import com.example.demo.domain.settlement.dto.SettlementRequestDto;
 import com.example.demo.domain.settlement.entity.Settlement;
@@ -59,7 +60,6 @@ public class SettlementService {
 		if (settlementRepository.findByCreatorIdAndSettlementMonth(request.getCreatorId(), settlementMonth).isPresent()) {
 			throw new BusinessException(ErrorCode.SETTLEMENT_ALREADY_PROCESSED);
 		}
-
 		// 정산 예상금액 계산
 		SettlementResponseDto settlementResponseDto = calculateSettlement(request.getCreatorId(), request.getYearMonth());
 		Creator creator = creatorRepository.findById(request.getCreatorId())
@@ -78,6 +78,26 @@ public class SettlementService {
 
 		Settlement savedSettlement = settlementRepository.save(settlement);
 		return toResponseDto(savedSettlement);
+	}
+
+	@Transactional
+	public SettlementResponseDto paySettlement(SettlementPayRequestDto request) {
+		YearMonth currentMonth = YearMonth.now();
+		String settlementMonth = request.getYearMonth().toString();
+
+		if (!request.getYearMonth().isBefore(currentMonth)) {
+			throw new BusinessException(ErrorCode.INVALID_SETTLEMENT_MONTH);
+		}
+
+		Settlement settlement = settlementRepository.findByCreatorIdAndSettlementMonth(request.getCreatorId(), settlementMonth)
+			.orElseThrow(() -> new BusinessException(ErrorCode.SETTLEMENT_NOT_FOUND));
+
+		if (settlement.getStatus() == SettlementStatus.PAID) {
+			throw new BusinessException(ErrorCode.SETTLEMENT_ALREADY_PAID);
+		}
+
+		settlement.markAsPaid();
+		return toResponseDto(settlement);
 	}
 
 	// 해당월 정산 없을경우 원천데이터로 계산

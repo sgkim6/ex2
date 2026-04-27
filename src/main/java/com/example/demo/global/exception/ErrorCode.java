@@ -13,6 +13,8 @@ public enum ErrorCode {
 	INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST, "E005", "날짜 형식이 올바르지 않습니다."),
 	SETTLEMENT_ALREADY_PROCESSED(HttpStatus.CONFLICT, "E006", "이미 확정 또는 지급된 정산입니다."),
 	INVALID_SETTLEMENT_MONTH(HttpStatus.BAD_REQUEST, "E007", "현재 월 또는 미래 월은 정산 확정할 수 없습니다."),
+	SETTLEMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "E008", "정산 내역을 찾을 수 없습니다."),
+	SETTLEMENT_ALREADY_PAID(HttpStatus.CONFLICT, "E009", "이미 지급된 정산입니다."),
 	;
 
 	private final HttpStatus status;

@@ -60,5 +60,25 @@
       "amount": 120000,
       "paidAt": "2025-02-14T10:00:00+09:00"
     }
+  ],
+  "cancels": [
+    {
+      "_comment": "cancel-1 — sale-3 전체 취소, 3월 취소",
+      "saleId": 3,
+      "refundAmount": 80000,
+      "canceledAt": "2025-03-25T10:00:00+09:00"
+    },
+    {
+      "_comment": "cancel-2 — sale-4 부분 취소 30000원, 3월 취소",
+      "saleId": 4,
+      "refundAmount": 30000,
+      "canceledAt": "2025-03-27T15:00:00+09:00"
+    },
+    {
+      "_comment": "cancel-3 — sale-5 취소, 2월 취소",
+      "saleId": 5,
+      "refundAmount": 60000,
+      "canceledAt": "2025-02-02T11:00:00+09:00"
+    }
   ]
 }

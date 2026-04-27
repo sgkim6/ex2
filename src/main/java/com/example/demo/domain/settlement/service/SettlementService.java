@@ -9,6 +9,9 @@ import com.example.demo.domain.sale.repository.SaleRepository;
 import com.example.demo.domain.settlement.dto.SettlementPayRequestDto;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
 import com.example.demo.domain.settlement.dto.SettlementRequestDto;
+import com.example.demo.domain.settlement.dto.SettlementSummaryItemDto;
+import com.example.demo.domain.settlement.dto.SettlementSummaryResponseDto;
+import com.example.demo.domain.settlement.dto.SettlementSummaryRequestDto;
 import com.example.demo.domain.settlement.entity.Settlement;
 import com.example.demo.domain.settlement.entity.SettlementStatus;
 import com.example.demo.domain.settlement.repository.SettlementRepository;
@@ -20,6 +23,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +102,64 @@ public class SettlementService {
 
 		settlement.markAsPaid();
 		return toResponseDto(settlement);
+	}
+
+
+	// 운영자용 정산 집계
+	@Transactional(readOnly = true)
+	public SettlementSummaryResponseDto getSettlementSummaries(SettlementSummaryRequestDto request) {
+		if (request.getStartYearMonth().isAfter(request.getEndYearMonth())) {
+			throw new BusinessException(ErrorCode.INVALID_DATE_RANGE);
+		}
+
+		List<SettlementSummaryItemDto> settlements = new ArrayList<>(); // 정산 담을 dto
+		long totalExpectedSettlementAmount = 0L; // 모든 강사의 정산액 합계
+		List<Creator> creators = creatorRepository.findAll(); // 전체 강사
+
+		/*
+			우선 요청받은 모든 월을 순회하며, 해당 월의 모든 강사 id에 대한 정산 조회
+			if 정산 존재 : 그대로 입력
+			elif 정산 미존재 : 정산 산출 메서드 써서 PENDING 넣기, 판/환 0일경우 아예 로그가 없는거니까 걍 무시
+		 */
+		for (YearMonth yearMonth = request.getStartYearMonth();
+			 !yearMonth.isAfter(request.getEndYearMonth());
+			 yearMonth = yearMonth.plusMonths(1)) {
+			YearMonth targetYearMonth = yearMonth;
+			String settlementMonth = yearMonth.toString();
+
+			for (Creator creator : creators) {
+				if (!creator.getIsValid()) {
+					continue;
+				}
+
+				// 정산 있으면 사용, 없으면 집계
+				SettlementResponseDto settlementResponseDto = settlementRepository
+					.findByCreatorIdAndSettlementMonth(creator.getId(), settlementMonth)
+					.map(this::toResponseDto)
+					.orElseGet(() -> calculateSettlement(creator.getId(), targetYearMonth));
+
+				// 집계한거 판매 환불 다없으면 무시
+				if (settlementResponseDto.getSalesCount() == 0 && settlementResponseDto.getCancelCount() == 0) {
+					continue;
+				}
+
+				settlements.add(SettlementSummaryItemDto.of(
+					creator.getId(),
+					creator.getName(),
+					settlementResponseDto.getYearMonth(),
+					settlementResponseDto.getExpectedSettlementAmount().longValue(),
+					settlementResponseDto.getStatus()
+				));
+				totalExpectedSettlementAmount += settlementResponseDto.getExpectedSettlementAmount().longValue();
+			}
+		}
+
+		return SettlementSummaryResponseDto.of(
+			request.getStartYearMonth().toString(),
+			request.getEndYearMonth().toString(),
+			settlements,
+			totalExpectedSettlementAmount
+		);
 	}
 
 	// 해당월 정산 없을경우 원천데이터로 계산

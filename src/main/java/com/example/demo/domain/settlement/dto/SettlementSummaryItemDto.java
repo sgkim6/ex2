@@ -11,14 +11,14 @@ public class SettlementSummaryItemDto {
 	private Long creatorId;
 	private String creatorName;
 	private String yearMonth;
-	private Integer expectedSettlementAmount; // 예상 정산금액
+	private Long expectedSettlementAmount; // 예상 정산금액
 	private SettlementStatus status;
 
 	public static SettlementSummaryItemDto of(
 		Long creatorId,
 		String creatorName,
 		String yearMonth,
-		Integer expectedSettlementAmount,
+		Long expectedSettlementAmount,
 		SettlementStatus status
 	) {
 		return SettlementSummaryItemDto.builder()

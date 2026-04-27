@@ -1,6 +1,5 @@
 package com.example.demo.domain.settlement.dto;
 
-import com.example.demo.domain.settlement.entity.Settlement;
 import com.example.demo.domain.settlement.entity.SettlementStatus;
 import java.math.BigDecimal;
 import lombok.Builder;

@@ -46,7 +46,7 @@ public class SettlementService {
 	}
 
 	@Transactional
-	public void confirmSettlement(SettlementRequestDto request) {
+	public SettlementResponseDto confirmSettlement(SettlementRequestDto request) {
 		YearMonth currentMonth = YearMonth.now();
 		String settlementMonth = request.getYearMonth().toString();
 
@@ -76,7 +76,8 @@ public class SettlementService {
 			.status(SettlementStatus.CONFIRM)
 			.build();
 
-		settlementRepository.save(settlement);
+		Settlement savedSettlement = settlementRepository.save(settlement);
+		return toResponseDto(savedSettlement);
 	}
 
 	// 해당월 정산 없을경우 원천데이터로 계산

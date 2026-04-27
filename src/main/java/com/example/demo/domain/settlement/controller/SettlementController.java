@@ -30,8 +30,7 @@ public class SettlementController {
 	}
 
 	@PostMapping("/confirm")
-	public ApiResult<Void> confirmSettlement(@RequestBody SettlementRequestDto request) {
-		settlementService.confirmSettlement(request);
-		return ApiResult.succeed(null, "정산 확정 완료");
+	public ApiResult<SettlementResponseDto> confirmSettlement(@RequestBody SettlementRequestDto request) {
+		return ApiResult.succeed(settlementService.confirmSettlement(request), "정산 확정 완료");
 	}
 }

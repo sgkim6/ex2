@@ -1,10 +1,12 @@
 package com.example.demo.domain.cancel.dto;
 
 import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class CancelRequestDto {
 

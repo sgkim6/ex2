@@ -2,15 +2,26 @@ package com.example.demo.domain.settlement.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.example.demo.domain.cancel.entity.Cancel;
+import com.example.demo.domain.cancel.repository.CancelRepository;
+import com.example.demo.domain.course.entity.Course;
+import com.example.demo.domain.course.repository.CourseRepository;
+import com.example.demo.domain.creator.entity.Creator;
+import com.example.demo.domain.creator.repository.CreatorRepository;
+import com.example.demo.domain.sale.entity.Sale;
+import com.example.demo.domain.sale.repository.SaleRepository;
 import com.example.demo.domain.settlement.dto.SettlementResponseDto;
 import com.example.demo.domain.settlement.entity.SettlementStatus;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = {
 	"spring.datasource.url=jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
@@ -21,10 +32,23 @@ import org.springframework.test.context.ActiveProfiles;
 	"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @ActiveProfiles("local")
+@Transactional
 class SettlementServiceIntegrationTest {
 
 	@Autowired
 	private SettlementService settlementService;
+
+	@Autowired
+	private CreatorRepository creatorRepository;
+
+	@Autowired
+	private CourseRepository courseRepository;
+
+	@Autowired
+	private SaleRepository saleRepository;
+
+	@Autowired
+	private CancelRepository cancelRepository;
 
 	@Test
 	@DisplayName("creator-1의 2025-03 정산은 총 판매 260000, 환불 110000, 순 판매 150000, 수수료 30000, 정산 예정 120000이다")
@@ -84,5 +108,66 @@ class SettlementServiceIntegrationTest {
 		assertEquals(0, result.getSalesCount());
 		assertEquals(0, result.getCancelCount());
 		assertEquals(SettlementStatus.PENDING, result.getStatus());
+	}
+
+	@Test
+	@DisplayName("월 시작과 끝 경계 시각 데이터는 해당 월 정산에 정확히 포함된다")
+	void getSettlement_boundaryDateTimes_areIncludedInMatchingMonth() {
+		Creator creator = creatorRepository.save(
+			Creator.builder()
+				.name("경계값 강사")
+				.build()
+		);
+
+		Course course = courseRepository.save(
+			Course.builder()
+				.creator(creator)
+				.title("경계값 강의")
+				.build()
+		);
+
+		Sale startBoundarySale = saleRepository.save(
+			Sale.builder()
+				.course(course)
+				.studentId("boundary-start")
+				.amount(10000)
+				.paidAt(OffsetDateTime.of(2025, 3, 1, 0, 0, 0, 0, ZoneOffset.ofHours(9)))
+				.build()
+		);
+
+		Sale endBoundarySale = saleRepository.save(
+			Sale.builder()
+				.course(course)
+				.studentId("boundary-end")
+				.amount(20000)
+				.paidAt(OffsetDateTime.of(2025, 3, 31, 23, 59, 59, 0, ZoneOffset.ofHours(9)))
+				.build()
+		);
+
+		cancelRepository.save(
+			Cancel.builder()
+				.sale(startBoundarySale)
+				.refundAmount(5000)
+				.canceledAt(OffsetDateTime.of(2025, 3, 1, 0, 0, 0, 0, ZoneOffset.ofHours(9)))
+				.build()
+		);
+
+		cancelRepository.save(
+			Cancel.builder()
+				.sale(endBoundarySale)
+				.refundAmount(10000)
+				.canceledAt(OffsetDateTime.of(2025, 3, 31, 23, 59, 59, 0, ZoneOffset.ofHours(9)))
+				.build()
+		);
+
+		SettlementResponseDto result = settlementService.getSettlement(creator.getId(), YearMonth.of(2025, 3));
+
+		assertEquals(30000, result.getTotalSalesAmount());
+		assertEquals(15000, result.getTotalRefundAmount());
+		assertEquals(15000, result.getNetSalesAmount());
+		assertEquals(3000, result.getFeeAmount());
+		assertEquals(12000, result.getExpectedSettlementAmount());
+		assertEquals(2, result.getSalesCount());
+		assertEquals(2, result.getCancelCount());
 	}
 }

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = {
 	"spring.datasource.url=jdbc:h2:mem:command-testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
@@ -23,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 	"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 @ActiveProfiles("local")
+@Transactional
 class SettlementCommandIntegrationTest {
 
 	@Autowired
@@ -58,5 +60,31 @@ class SettlementCommandIntegrationTest {
 		);
 
 		assertEquals(ErrorCode.SETTLEMENT_ALREADY_PAID, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("현재 월 정산은 확정할 수 없다")
+	void confirmSettlement_currentMonth_throwsException() {
+		SettlementRequestDto request = new SettlementRequestDto(1L, YearMonth.now());
+
+		BusinessException exception = assertThrows(
+			BusinessException.class,
+			() -> settlementService.confirmSettlement(request)
+		);
+
+		assertEquals(ErrorCode.INVALID_SETTLEMENT_MONTH, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("미래 월 정산은 지급할 수 없다")
+	void paySettlement_futureMonth_throwsException() {
+		SettlementPayRequestDto request = new SettlementPayRequestDto(1L, YearMonth.now().plusMonths(1));
+
+		BusinessException exception = assertThrows(
+			BusinessException.class,
+			() -> settlementService.paySettlement(request)
+		);
+
+		assertEquals(ErrorCode.INVALID_SETTLEMENT_MONTH, exception.getErrorCode());
 	}
 }

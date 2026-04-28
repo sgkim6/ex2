@@ -72,7 +72,7 @@ class SettlementServiceIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("판매 내역이 없는 월은 0원 응답과 PENDING 상태로 반환된다")
+	@DisplayName("판매 내역이 없는 월은 단일 조회 시 0원 응답과 PENDING 상태로 반환된다")
 	void getSettlement_emptyMonth_returnsZeroAmounts() {
 		SettlementResponseDto result = settlementService.getSettlement(3L, YearMonth.of(2025, 3));
 

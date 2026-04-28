@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,12 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(
-	name = "courses",
-	indexes = {
-		@Index(name = "idx_course_creator", columnList = "creator_id")
-	}
-)
+@Table(name = "courses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Course extends BaseEntity {
 
